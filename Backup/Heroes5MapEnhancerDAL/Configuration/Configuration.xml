@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Configuration>
+	<H5MapFolder>E:\Program Files\Heroes 5\Heroes of Might and Magic V - Tribes of the East\Maps</H5MapFolder>
+	<DeleteUnPAKedMaps>true</DeleteUnPAKedMaps>
+</Configuration>
