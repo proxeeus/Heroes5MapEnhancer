@@ -9,49 +9,38 @@ namespace Heroes5MapAPI
 {
     public static class Utils
     {
-        public static DirectoryInfo GetFinalSubDirectory(string pakRootDirectory)
+        public static string GetMapXDBPath(string pakRootDirectory)
         {
-            DirectoryInfo finalSubDirectory = null;
+            var directoryInfo = new DirectoryInfo(pakRootDirectory);
+            var fileList = directoryInfo.GetFiles("*.xdb", SearchOption.AllDirectories);
+            var query =
+                from file in fileList
+                where file.Name == "map.xdb"
+                select file;
 
-            DirectoryInfo rootDirectory = new DirectoryInfo(pakRootDirectory);
-            DirectoryInfo[] subDirectories = rootDirectory.GetDirectories();
-            if (subDirectories.Count() > 0)
-            {
-                foreach (DirectoryInfo subDirectory in subDirectories)
-                {
+            return query.First().FullName;
+        }
 
-                    finalSubDirectory = Utils.GetFinalSubDirectory(subDirectory.FullName);
-                }
-            }
+        public static string GetMapScriptXDBPath(string pakRootDirectory)
+        {
+            var directoryInfo = new DirectoryInfo(pakRootDirectory);
+            var fileList = directoryInfo.GetFiles("*.xdb", SearchOption.AllDirectories);
+            var query =
+                from file in fileList
+                where file.Name == "mapscript.xdb"
+                select file;
+
+            if(query.Any())
+                return query.First().FullName;
             else
             {
-                finalSubDirectory = rootDirectory;
+                return string.Empty;
             }
-
-            return finalSubDirectory;
         }
 
-        public static FileInfo GetMapScriptXDBFromMapFile(string pakRootDirectory)
+        public static void CreateMapScriptXDBInMapFile(string mapXDBPath)
         {
-            FileInfo mapScript = null;
-
-            FileInfo mapFile = new FileInfo(Path.Combine(pakRootDirectory, "map.xdb"));
-            if (mapFile.Exists)
-            {
-                XElement mapRootElement = XElement.Load(mapFile.FullName);
-                if (mapRootElement.Element("MapScript").HasAttributes)
-                {
-                    string[] name = mapRootElement.Element("MapScript").FirstAttribute.Value.Split(new char[] { '#' });
-                    mapScript = new FileInfo(Path.Combine(pakRootDirectory, name[0]));
-                }
-            }
-
-            return mapScript;
-        }
-
-        public static void CreateMapScriptXDBInMapFile(string pakRootDirectory)
-        {
-            FileInfo mapFile = new FileInfo(Path.Combine(pakRootDirectory, "map.xdb"));
+            FileInfo mapFile = new FileInfo(mapXDBPath);
             if (mapFile.Exists)
             {
                 XElement mapRootElement = XElement.Load(mapFile.FullName);

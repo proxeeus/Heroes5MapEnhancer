@@ -17,6 +17,8 @@ namespace Heroes5MapEnhancer
         private FileInfo _mapScriptXDB;
         private FileInfo _mapScriptLUA;
         private DirectoryInfo _finalSubDirectory;
+        private string _mapXDBPath;
+        private string _mapScriptXDBPath;
 
         public MapEnhancer() { }
 
@@ -53,21 +55,24 @@ namespace Heroes5MapEnhancer
             this.UnPAKMap(mapFile);
 
             // 2. Get folder paths relative to mapscript.xdb/lua or create them if they don't exist.
-            this._finalSubDirectory = Utils.GetFinalSubDirectory(this._currentUnPAKedDirectory.FullName);
-            this._mapScriptXDB = Utils.GetMapScriptXDBFromMapFile(this._finalSubDirectory.FullName);
-            if (this._mapScriptXDB != null)
+            //this._finalSubDirectory = Utils.GetFinalSubDirectory(this._currentUnPAKedDirectory.FullName);
+            this._mapXDBPath = Utils.GetMapXDBPath(this._currentUnPAKedDirectory.FullName);
+            //this._mapScriptXDB = Utils.GetMapScriptXDBFromMapFile(this._finalSubDirectory.FullName);
+            this._mapScriptXDBPath = Utils.GetMapScriptXDBPath(this._currentUnPAKedDirectory.FullName);
+
+            if (this._mapScriptXDBPath != string.Empty)
             {
-                MapscriptXDBReader mapScriptXDBReader = new MapscriptXDBReader(this._mapScriptXDB.FullName);
+                MapscriptXDBReader mapScriptXDBReader = new MapscriptXDBReader(this._mapScriptXDBPath);
                 string luaScriptName = mapScriptXDBReader.GetMapScriptLUAFileName();
-                this._mapScriptLUA = new FileInfo(Path.Combine(this._mapScriptXDB.Directory.FullName, luaScriptName));
+                this._mapScriptLUA = new FileInfo(Path.Combine(this._mapScriptXDBPath.Replace("mapscript.xdb", string.Empty), luaScriptName));
             }
             else
             {
                 this.CreateMapscripts();
             }
 
-            MapscriptLUAWriter mapScriptLUAWriter = new MapscriptLUAWriter(this._finalSubDirectory.FullName);
-            mapScriptLUAWriter.WriteScript();
+            MapscriptLUAWriter mapScriptLUAWriter = new MapscriptLUAWriter(this._mapScriptLUA.DirectoryName);
+            mapScriptLUAWriter.WriteScript(_mapXDBPath);
 
 
             // ??. Repak map
@@ -78,12 +83,12 @@ namespace Heroes5MapEnhancer
         private void CreateMapscripts()
         {
             Console.WriteLine("Writing reference to mapscript.xdb into map.xdb...");
-            Utils.CreateMapScriptXDBInMapFile(this._finalSubDirectory.FullName);
-            MapscriptXDBWriter mapScriptXDBWriter = new MapscriptXDBWriter(this._finalSubDirectory.FullName);
+            Utils.CreateMapScriptXDBInMapFile(this._mapXDBPath);
+            MapscriptXDBWriter mapScriptXDBWriter = new MapscriptXDBWriter(this._mapXDBPath);
             Console.WriteLine("Creating mapscript.xdb file...");
             this._mapScriptXDB = mapScriptXDBWriter.CreateMapscriptXDBFile();
             Console.WriteLine("Creating mapscript.lua file...");
-            MapscriptLUAWriter mapScriptLUAWriter = new MapscriptLUAWriter(this._finalSubDirectory.FullName);
+            MapscriptLUAWriter mapScriptLUAWriter = new MapscriptLUAWriter(this._mapXDBPath);
             this._mapScriptLUA = mapScriptLUAWriter.CreateMapscriptLUAFile();
         }
 

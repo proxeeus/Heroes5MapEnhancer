@@ -9,16 +9,15 @@ namespace Heroes5MapAPI.MapscriptGen
 {
     public class MapscriptXDBWriter
     {
-        private string _rootDirectory;
+        private string _mapScriptXDBPath;
 
-        public MapscriptXDBWriter(string rootDirectory)
+        public MapscriptXDBWriter(string mapScriptXDBPath)
         {
-            this._rootDirectory = rootDirectory;
+            this._mapScriptXDBPath = mapScriptXDBPath.Replace("map.xdb", "mapscript.xdb");
         }
 
         public FileInfo CreateMapscriptXDBFile()
         {
-            string mapScriptXDBPath = Path.Combine(this._rootDirectory, "mapscript.xdb");
             string mapScriptXDBBaseContents =
                 @"<?xml version=""1.0"" encoding=""UTF-8""?>
                     <Script>
@@ -26,11 +25,11 @@ namespace Heroes5MapAPI.MapscriptGen
 	                    <ScriptText/>
                     </Script>
             ";
-            using (StreamWriter writer = new StreamWriter(mapScriptXDBPath, true, Encoding.UTF8))
+            using (StreamWriter writer = new StreamWriter(_mapScriptXDBPath, true, Encoding.UTF8))
             {
                 writer.Write(mapScriptXDBBaseContents);
             }
-            FileInfo mapScriptXDBFile = new FileInfo(mapScriptXDBPath);
+            FileInfo mapScriptXDBFile = new FileInfo(_mapScriptXDBPath);
             
             return mapScriptXDBFile;
         }
